@@ -25,6 +25,8 @@ var asterisk, asteriskSize = utf8.DecodeRuneInString("*")
 var colon, colonSize = utf8.DecodeRuneInString(":")
 var at, atSize = utf8.DecodeRuneInString("@")
 
+var position int = 0
+
 // var reAtEnd = /[\t\n\f\r "#'()/;[\\\]{}]/g
 // var reWordEnd = /[\t\n\f\r !"#'():;@[\\\]{}]|\/(?=\*)/g
 // var reBadBracket = /.[\n"'(/\\]/
