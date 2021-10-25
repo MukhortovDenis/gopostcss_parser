@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"unicode/utf8"
 )
@@ -32,6 +33,9 @@ var position int = 0
 // var reBadBracket = /.[\n"'(/\\]/
 // var reHexEscape = /[\da-f]/i
 
-func tokenize() {
-	fmt.Println(space)
+func nextToken(buffer bytes.Buffer) {
+	for buffer.Len() > 0 {
+		code := buffer.Next(1)
+		fmt.Print(code)
+	}
 }

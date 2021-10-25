@@ -3,12 +3,11 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 )
 
-func input(urlToCss string) {
+func input(urlToCss string) bytes.Buffer {
 	if urlToCss == "" {
 		log.Fatal("Не получил строку css")
 	}
@@ -16,11 +15,14 @@ func input(urlToCss string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	wr := bytes.Buffer{}
+	buffer := bytes.Buffer{}
 	sc := bufio.NewScanner(file)
 	for sc.Scan() {
-		wr.WriteString(sc.Text())
+		buffer.WriteString(sc.Text())
 	}
-	fmt.Println(wr.String())
 	defer file.Close()
+	return buffer
+	// if &buffer[0] == "\uFEFF" || buffer[0] == "\uFFFE" {
+
+	// }
 }

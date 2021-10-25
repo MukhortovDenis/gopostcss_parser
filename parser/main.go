@@ -2,6 +2,6 @@ package main
 
 func main() {
 	safeParser()
-	tokenize()
-	input("test.css")
+	buffer := input("test.css")
+	nextToken(buffer)
 }
