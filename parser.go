@@ -3,6 +3,7 @@ package parser
 import (
 	"bufio"
 	"os"
+	"strings"
 
 	"go.uber.org/zap"
 )
@@ -12,6 +13,7 @@ var (
 	selectorID    = []byte("#")
 	selectorClass = []byte(".")
 	selectorAll   = []byte("*")
+	importCss     = []byte("@")
 )
 
 type AST struct {
@@ -40,7 +42,7 @@ func ParseIntoCSS(ast *AST) error {
 	return nil
 }
 
-func (ast *AST) scanFile(filename string) error {
+func (ast *AST) scanFile(filename string) ([]*Token, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		ast.logger.Error("error", zap.Error(err))
@@ -54,9 +56,11 @@ func (ast *AST) scanFile(filename string) error {
 		cache[i] = sc.Bytes()
 		i++
 	}
-
-	_, _ = ast.createTokens(cache)
-	return nil
+	tokens, err := ast.createTokens(cache)
+	if err != nil {
+		ast.logger.Error("error", zap.Error(err))
+	}
+	return tokens, nil
 }
 
 func (ast *AST) createTokens(cache map[int][]byte) ([]*Token, error) {
@@ -67,37 +71,59 @@ func (ast *AST) createTokens(cache map[int][]byte) ([]*Token, error) {
 		case newline[0]:
 			continue
 
+		case importCss[0]:
+			tokenImport, err := tokenImport(i, cache)
+			if err != nil {
+				return nil, err
+			}
+			tokens = append(tokens, tokenImport)
+
 		case selectorAll[0]:
 			tokenAll, err := tokenSelectorAll(i, cache)
 			if err != nil {
-				ast.logger.Error("error", zap.Error(err))
+				return nil, err
 			}
 			tokens = append(tokens, tokenAll)
 
 		case selectorID[0]:
 			tokenID, err := tokenSelectorID(i, cache)
 			if err != nil {
-				ast.logger.Error("error", zap.Error(err))
+				return nil, err
 			}
 			tokens = append(tokens, tokenID)
 
 		case selectorClass[0]:
 			tokenClass, err := tokenSelectorClass(i, cache)
 			if err != nil {
-				ast.logger.Error("error", zap.Error(err))
+				return nil, err
 			}
 			tokens = append(tokens, tokenClass)
 
 		default:
 			tokenTag, err := tokenSelectorTag(i, cache)
 			if err != nil {
-				ast.logger.Error("error", zap.Error(err))
+				return nil, err
 			}
 			tokens = append(tokens, tokenTag)
 		}
 
 	}
 	return tokens, nil
+}
+
+func tokenImport(i int, cache map[int][]byte) (*Token, error) {
+	token := &Token{Name: "import"}
+	rule := map[string]string{}
+	str := cache[i]
+	slice := strings.Split(string(str), " ")
+	for i, word := range slice{
+		word = strings.TrimSuffix(word, ",")
+		word = strings.TrimSuffix(word, ";")
+		slice[i] = word
+	}
+	Rule := Rule(rule)
+	token.Rules = append(token.Rules, &Rule)
+	return token, nil
 }
 
 func tokenSelectorID(i int, cache map[int][]byte) (*Token, error)
