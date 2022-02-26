@@ -26,7 +26,7 @@ type Token struct {
 	Rules []*Rule
 }
 
-type Rule map[string]string
+type Rule map[int]string
 
 // ParseIntoAST css into AST
 func ParseIntoAST(filename string) (*AST, error) {
@@ -113,13 +113,13 @@ func (ast *AST) createTokens(cache map[int][]byte) ([]*Token, error) {
 
 func tokenImport(i int, cache map[int][]byte) (*Token, error) {
 	token := &Token{Name: "import"}
-	rule := map[string]string{}
+	rule := map[int]string{}
 	str := cache[i]
 	slice := strings.Split(string(str), " ")
 	for i, word := range slice{
 		word = strings.TrimSuffix(word, ",")
 		word = strings.TrimSuffix(word, ";")
-		slice[i] = word
+		rule[i] = word
 	}
 	Rule := Rule(rule)
 	token.Rules = append(token.Rules, &Rule)
