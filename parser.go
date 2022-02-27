@@ -56,14 +56,14 @@ func (ast *AST) scanFile(filename string) ([]*Token, error) {
 		cache[i] = sc.Bytes()
 		i++
 	}
-	tokens, err := ast.createTokens(cache)
+	tokens, err := ast.tokenizator(cache)
 	if err != nil {
 		ast.logger.Error("error", zap.Error(err))
 	}
 	return tokens, nil
 }
 
-func (ast *AST) createTokens(cache map[int][]byte) ([]*Token, error) {
+func (ast *AST) tokenizator(cache map[int][]byte) ([]*Token, error) {
 	tokens := []*Token{}
 	for i, key := range cache {
 		switch key[0] {
@@ -116,7 +116,7 @@ func tokenImport(i int, cache map[int][]byte) (*Token, error) {
 	rule := map[int]string{}
 	str := cache[i]
 	slice := strings.Split(string(str), " ")
-	for i, word := range slice{
+	for i, word := range slice {
 		word = strings.TrimSuffix(word, ",")
 		word = strings.TrimSuffix(word, ";")
 		rule[i] = word
@@ -126,10 +126,51 @@ func tokenImport(i int, cache map[int][]byte) (*Token, error) {
 	return token, nil
 }
 
-func tokenSelectorID(i int, cache map[int][]byte) (*Token, error)
+func tokenSelectorID(i int, cache map[int][]byte) (*Token, error) {
+	str := string(cache[i])
+	slice := strings.Split(string(str), " ")
+	if !isValidSyntax(slice) {
+		return nil, errWrongSyntax(i)
+	}
+	token := &Token{Name: "Selector ID"}
+	return token, nil
+}
 
-func tokenSelectorClass(i int, cache map[int][]byte) (*Token, error)
+func tokenSelectorClass(i int, cache map[int][]byte) (*Token, error) {
+	str := string(cache[i])
+	slice := strings.Split(string(str), " ")
+	if !isValidSyntax(slice) {
+		return nil, errWrongSyntax(i)
+	}
+	token := &Token{Name: "Selector Class"}
+	return token, nil
+}
 
-func tokenSelectorAll(i int, cache map[int][]byte) (*Token, error)
+func tokenSelectorAll(i int, cache map[int][]byte) (*Token, error) {
+	str := string(cache[i])
+	slice := strings.Split(string(str), " ")
+	if !isValidSyntax(slice) {
+		return nil, errWrongSyntax(i)
+	}
+	token := &Token{Name: "Selector for All"}
+	return token, nil
+}
 
-func tokenSelectorTag(i int, cache map[int][]byte) (*Token, error)
+func tokenSelectorTag(i int, cache map[int][]byte) (*Token, error) {
+	str := string(cache[i])
+	slice := strings.Split(string(str), " ")
+	if !isValidSyntax(slice) {
+		return nil, errWrongSyntax(i)
+	}
+	token := &Token{Name: "Selector Tag"}
+	return token, nil
+}
+
+func isValidSyntax(slice []string) bool {
+	if len(slice) != 2 || slice[1] != "{" {
+		if len(slice) != 1 || !strings.Contains(slice[0], "{") {
+			return false
+		}
+	}
+	return true
+}
