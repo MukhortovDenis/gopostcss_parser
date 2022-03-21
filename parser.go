@@ -2,6 +2,8 @@ package parser
 
 import (
 	"bufio"
+	"errors"
+	"fmt"
 	"os"
 	"strings"
 
@@ -13,7 +15,7 @@ var (
 	selectorID    = []byte("#")
 	selectorClass = []byte(".")
 	selectorAll   = []byte("*")
-	importCss     = []byte("@")
+	a_rule        = []byte("@")
 )
 
 type AST struct {
@@ -22,8 +24,8 @@ type AST struct {
 }
 
 type Token struct {
-	Name  string
 	Type  string
+	Name  string
 	Rules []*Rule
 }
 
@@ -72,8 +74,8 @@ func (ast *AST) tokenizator(cache map[int][]byte) ([]*Token, error) {
 		case newline[0]:
 			continue
 
-		case importCss[0]:
-			tokenImport, newIndex, err := tokenImport(i, cache)
+		case a_rule[0]:
+			tokenImport, newIndex, err := tokenARule(i, cache)
 			if err != nil {
 				return nil, err
 			}
@@ -117,27 +119,67 @@ func (ast *AST) tokenizator(cache map[int][]byte) ([]*Token, error) {
 	return tokens, nil
 }
 
-func tokenImport(i int, cache map[int][]byte) (*Token, int, error) {
-	token := &Token{Name: "import"}
+func tokenARule(i int, cache map[int][]byte) (*Token, int, error) {
+	token := &Token{Type: "@-Rules"}
 	rule := map[int]string{}
 	var str []byte
 	str = cache[i]
-	slice := strings.Split(string(str), " ")
-	for ind, word := range slice {
-		word = strings.TrimSuffix(word, ",")
-		word = strings.TrimSuffix(word, ";")
-		rule[ind] = word
+	if strings.Contains(string(cache[i]), "import") {
+		token.Name = "@import"
+		slice := strings.Split(string(str), " ")
+		for ind, word := range slice {
+			word = strings.TrimSuffix(word, ",")
+			word = strings.TrimSuffix(word, ";")
+			fmt.Println(word)
+			rule[ind] = word
+		}
 		Rule := Rule(rule)
 		token.Rules = append(token.Rules, &Rule)
+		i++
+		return token, i, nil
 	}
-	i++
-	return token, i, nil
+	if strings.Contains(string(cache[i]), "charset") {
+		token.Name = "@charset"
+		slice := strings.Split(string(str), " ")
+		for ind, word := range slice {
+			word = strings.TrimSuffix(word, ",")
+			word = strings.TrimSuffix(word, ";")
+			rule[ind] = word
+		}
+		Rule := Rule(rule)
+		token.Rules = append(token.Rules, &Rule)
+		i++
+		return token, i, nil
+	}
+	if strings.Contains(string(cache[i]), "@font-face") || strings.Contains(string(cache[i]), "@page") {
+		firstSlice := strings.Split(string(cache[i]), " ")
+		token.Name = firstSlice[0]
+		for {
+			rule := map[int]string{}
+			str = cache[i]
+			slice := strings.Split(string(str), " ")
+			for ind, word := range slice {
+				word = strings.TrimSuffix(word, ",")
+				word = strings.TrimSuffix(word, ";")
+				rule[ind] = word
+			}
+			Rule := Rule(rule)
+			token.Rules = append(token.Rules, &Rule)
+			i++
+			if strings.Contains(string(str), "}") {
+				break
+			}
+		}
+		return token, i, nil
+	}
+	return nil, 0, errors.New("invalid @-rule")
 }
 
 func tokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
-	token := &Token{Name: "Selector ID"}
-	str := cache[i]
-	token.Type = string(str[0])
+	token := &Token{Type: "Selector ID"}
+	var str []byte
+	firstSlice := strings.Split(string(cache[i]), " ")
+	token.Name = firstSlice[0]
 	i++
 	for {
 		rule := map[int]string{}
@@ -159,9 +201,10 @@ func tokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
 }
 
 func tokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
-	token := &Token{Name: "Selector Class"}
-	str := cache[i]
-	token.Type = string(str[0])
+	token := &Token{Type: "Selector Class"}
+	var str []byte
+	firstSlice := strings.Split(string(cache[i]), " ")
+	token.Name = firstSlice[0]
 	i++
 	for {
 		rule := map[int]string{}
@@ -183,9 +226,10 @@ func tokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
 }
 
 func tokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
-	token := &Token{Name: "Selector All"}
-	str := cache[i]
-	token.Type = string(str[0])
+	token := &Token{Type: "Selector All"}
+	var str []byte
+	firstSlice := strings.Split(string(cache[i]), " ")
+	token.Name = firstSlice[0]
 	i++
 	for {
 		rule := map[int]string{}
@@ -207,9 +251,10 @@ func tokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
 }
 
 func tokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
-	token := &Token{Name: "Selector Tag"}
-	str := cache[i]
-	token.Type = string(str[0])
+	token := &Token{Type: "Selector Tag"}
+	var str []byte
+	firstSlice := strings.Split(string(cache[i]), " ")
+	token.Name = firstSlice[0]
 	i++
 	for {
 		rule := map[int]string{}
