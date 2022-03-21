@@ -23,6 +23,7 @@ type AST struct {
 
 type Token struct {
 	Name  string
+	Type  string
 	Rules []*Rule
 }
 
@@ -72,105 +73,168 @@ func (ast *AST) tokenizator(cache map[int][]byte) ([]*Token, error) {
 			continue
 
 		case importCss[0]:
-			tokenImport, err := tokenImport(i, cache)
+			tokenImport, newIndex, err := tokenImport(i, cache)
 			if err != nil {
 				return nil, err
 			}
 			tokens = append(tokens, tokenImport)
+			i = newIndex
 
 		case selectorAll[0]:
-			tokenAll, err := tokenSelectorAll(i, cache)
+			tokenAll, newIndex, err := tokenSelectorAll(i, cache)
 			if err != nil {
 				return nil, err
 			}
 			tokens = append(tokens, tokenAll)
+			i = newIndex
 
 		case selectorID[0]:
-			tokenID, err := tokenSelectorID(i, cache)
+			tokenID, newIndex, err := tokenSelectorID(i, cache)
 			if err != nil {
 				return nil, err
 			}
 			tokens = append(tokens, tokenID)
+			i = newIndex
 
 		case selectorClass[0]:
-			tokenClass, err := tokenSelectorClass(i, cache)
+			tokenClass, newIndex, err := tokenSelectorClass(i, cache)
 			if err != nil {
 				return nil, err
 			}
 			tokens = append(tokens, tokenClass)
+			i = newIndex
 
 		default:
-			tokenTag, err := tokenSelectorTag(i, cache)
+			tokenTag, newIndex, err := tokenSelectorTag(i, cache)
 			if err != nil {
 				return nil, err
 			}
 			tokens = append(tokens, tokenTag)
+			i = newIndex
 		}
 
 	}
 	return tokens, nil
 }
 
-func tokenImport(i int, cache map[int][]byte) (*Token, error) {
+func tokenImport(i int, cache map[int][]byte) (*Token, int, error) {
 	token := &Token{Name: "import"}
 	rule := map[int]string{}
-	str := cache[i]
+	var str []byte
+	str = cache[i]
 	slice := strings.Split(string(str), " ")
-	for i, word := range slice {
+	for ind, word := range slice {
 		word = strings.TrimSuffix(word, ",")
 		word = strings.TrimSuffix(word, ";")
-		rule[i] = word
+		rule[ind] = word
+		Rule := Rule(rule)
+		token.Rules = append(token.Rules, &Rule)
 	}
-	Rule := Rule(rule)
-	token.Rules = append(token.Rules, &Rule)
-	return token, nil
+	i++
+	return token, i, nil
 }
 
-func tokenSelectorID(i int, cache map[int][]byte) (*Token, error) {
-	str := string(cache[i])
-	slice := strings.Split(string(str), " ")
-	if !isValidSyntax(slice) {
-		return nil, errWrongSyntax(i)
-	}
+func tokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
 	token := &Token{Name: "Selector ID"}
-	return token, nil
-}
-
-func tokenSelectorClass(i int, cache map[int][]byte) (*Token, error) {
-	str := string(cache[i])
-	slice := strings.Split(string(str), " ")
-	if !isValidSyntax(slice) {
-		return nil, errWrongSyntax(i)
-	}
-	token := &Token{Name: "Selector Class"}
-	return token, nil
-}
-
-func tokenSelectorAll(i int, cache map[int][]byte) (*Token, error) {
-	str := string(cache[i])
-	slice := strings.Split(string(str), " ")
-	if !isValidSyntax(slice) {
-		return nil, errWrongSyntax(i)
-	}
-	token := &Token{Name: "Selector for All"}
-	return token, nil
-}
-
-func tokenSelectorTag(i int, cache map[int][]byte) (*Token, error) {
-	str := string(cache[i])
-	slice := strings.Split(string(str), " ")
-	if !isValidSyntax(slice) {
-		return nil, errWrongSyntax(i)
-	}
-	token := &Token{Name: "Selector Tag"}
-	return token, nil
-}
-
-func isValidSyntax(slice []string) bool {
-	if len(slice) != 2 || slice[1] != "{" {
-		if len(slice) != 1 || !strings.Contains(slice[0], "{") {
-			return false
+	str := cache[i]
+	token.Type = string(str[0])
+	i++
+	for {
+		rule := map[int]string{}
+		str = cache[i]
+		slice := strings.Split(string(str), " ")
+		for ind, word := range slice {
+			word = strings.TrimSuffix(word, ",")
+			word = strings.TrimSuffix(word, ";")
+			rule[ind] = word
+			Rule := Rule(rule)
+			token.Rules = append(token.Rules, &Rule)
+		}
+		i++
+		if strings.Contains(string(str), "}") {
+			break
 		}
 	}
-	return true
+	return token, i, nil
 }
+
+func tokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
+	token := &Token{Name: "Selector Class"}
+	str := cache[i]
+	token.Type = string(str[0])
+	i++
+	for {
+		rule := map[int]string{}
+		str = cache[i]
+		slice := strings.Split(string(str), " ")
+		for ind, word := range slice {
+			word = strings.TrimSuffix(word, ",")
+			word = strings.TrimSuffix(word, ";")
+			rule[ind] = word
+			Rule := Rule(rule)
+			token.Rules = append(token.Rules, &Rule)
+		}
+		i++
+		if strings.Contains(string(str), "}") {
+			break
+		}
+	}
+	return token, i, nil
+}
+
+func tokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
+	token := &Token{Name: "Selector All"}
+	str := cache[i]
+	token.Type = string(str[0])
+	i++
+	for {
+		rule := map[int]string{}
+		str = cache[i]
+		slice := strings.Split(string(str), " ")
+		for ind, word := range slice {
+			word = strings.TrimSuffix(word, ",")
+			word = strings.TrimSuffix(word, ";")
+			rule[ind] = word
+			Rule := Rule(rule)
+			token.Rules = append(token.Rules, &Rule)
+		}
+		i++
+		if strings.Contains(string(str), "}") {
+			break
+		}
+	}
+	return token, i, nil
+}
+
+func tokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
+	token := &Token{Name: "Selector Tag"}
+	str := cache[i]
+	token.Type = string(str[0])
+	i++
+	for {
+		rule := map[int]string{}
+		str = cache[i]
+		slice := strings.Split(string(str), " ")
+		for ind, word := range slice {
+			word = strings.TrimSuffix(word, ",")
+			word = strings.TrimSuffix(word, ";")
+			rule[ind] = word
+			Rule := Rule(rule)
+			token.Rules = append(token.Rules, &Rule)
+		}
+		i++
+		if strings.Contains(string(str), "}") {
+			break
+		}
+	}
+	return token, i, nil
+}
+
+// func isValidSyntax(slice []string) bool {
+// 	if len(slice) != 2 || slice[1] != "{" {
+// 		if len(slice) != 1 || !strings.Contains(slice[0], "{") {
+// 			return false
+// 		}
+// 	}
+// 	return true
+// }
