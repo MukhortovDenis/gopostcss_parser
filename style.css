@@ -31,7 +31,6 @@ a {
   padding-right: 15px;
 }
 
-/* Header */
 .header {
   height: 60px;
   border-bottom: 1px solid rgb(230, 230, 230);
@@ -74,11 +73,11 @@ a {
   color: #444;
   transition: color .2s linear;
 }
+
 .nav__link:hover {
   color: #777;
 }
 
-/* Hero */
 .hero {
   padding: 100px 0;
 }
@@ -96,9 +95,11 @@ a {
   color: #444;
   border: 1px solid #444;
 }
+
 .input::placeholder{
   color: #999;
 }
+
 .input:focus {
   outline: 2px solid #444;
   outline-offset: -2px;
@@ -111,9 +112,9 @@ a {
   color: #fff;
   background-color: #444;
   border: 1px solid #444;
-  transition: background-color .2s linear,
-              border-color .2s linear;
+  transition: background-color .2s linear, border-color .2s linear;
 }
+
 .input__button:hover {
   background-color: #777;
   border-color: #777;

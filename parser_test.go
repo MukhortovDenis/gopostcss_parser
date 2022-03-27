@@ -36,8 +36,8 @@ var testCaseAll map[int][]byte = map[int][]byte{
 
 // ================================================selector-tag======================================
 var testCaseTag map[int][]byte = map[int][]byte{
-	0: []byte(`P {`), 1: []byte(`text-align: justify;`),
-	2: []byte(`color: green;`), 3: []byte(`}`)}
+	7: []byte(`P {`), 8: []byte(`text-align: justify;`),
+	9: []byte(`color: green;`), 10: []byte(`}`)}
 // ==================================================================================================
 
 func Test_tokenARule(t *testing.T) {
@@ -100,8 +100,8 @@ func Test_tokenSelectorAll(t *testing.T) {
 }
 
 func Test_tokenSelectorTag(t *testing.T) {
-	t.Run("Проверка создания токена универсального селектора", func(tt *testing.T) {
-		token, index, err := tokenSelectorTag(0, testCaseTag)
+	t.Run("Проверка создания токена селектора тега", func(tt *testing.T) {
+		token, index, err := tokenSelectorTag(7, testCaseTag)
 		if err != nil {
 			t.Error(err)
 		}
@@ -110,5 +110,21 @@ func Test_tokenSelectorTag(t *testing.T) {
 			t.Log(token.Rules[i], "\n")
 		}
 		t.Log("-----------------------------------------")
+	})
+}
+
+func Test_ParseIntoAST(t *testing.T){
+	t.Run("Проверка преобразования CSS в AST", func(tt *testing.T){
+		ast, err := ParseIntoAST("stylelint.css")
+		if err != nil {
+			tt.Error(err)
+		}
+		t.Log(ast, "\n")
+		for i := range ast.Tokens {
+			t.Log(ast.Tokens[i], "\n")
+			for k := range ast.Tokens[i].Rules{
+				t.Log(ast.Tokens[i].Rules[k], "\n")
+			}
+		}
 	})
 }

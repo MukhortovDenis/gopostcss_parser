@@ -10,13 +10,15 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	newline       = []byte("\n")
-	selectorID    = []byte("#")
-	selectorClass = []byte(".")
-	selectorAll   = []byte("*")
-	a_rule        = []byte("@")
+const (
+	newline       byte = 10
+	selectorID    byte = 35
+	selectorClass byte = 46
+	selectorAll   byte = 42
+	a_rule        byte = 64
 )
+
+var nullString []byte =[]byte{}
 
 type AST struct {
 	Tokens []*Token
@@ -45,7 +47,7 @@ func ParseIntoCSS(ast *AST) error {
 	return nil
 }
 
-func (ast *AST) scanFile(filename string) ([]*Token, error) {
+func (ast *AST) scanFile(filename string) error {
 	file, err := os.Open(filename)
 	if err != nil {
 		ast.logger.Error("error", zap.Error(err))
@@ -59,66 +61,80 @@ func (ast *AST) scanFile(filename string) ([]*Token, error) {
 		cache[i] = sc.Bytes()
 		i++
 	}
-	tokens, err := ast.tokenizator(cache)
+	fmt.Println(cache)
+	err = ast.tokenizator(cache)
 	if err != nil {
 		ast.logger.Error("error", zap.Error(err))
 	}
-	return tokens, nil
+	return nil
 }
 
-func (ast *AST) tokenizator(cache map[int][]byte) ([]*Token, error) {
-	tokens := []*Token{}
-	for i, k := range cache {
-		switch k[0] {
+func (ast *AST) tokenizator(cache map[int][]byte) error {
+	var i int = 0
+	fmt.Println(len(cache))
+	for  {
+		fmt.Println(i, "and", len(cache))
+		if len(cache) == i{
+			break
+		}
+		if len(cache[i]) == 0 {
+			i++
+			continue
+		}
+		switch cache[i][0] {
 
-		case newline[0]:
+		case newline:
+			i++
 			continue
 
-		case a_rule[0]:
+		case a_rule:
 			tokenImport, newIndex, err := tokenARule(i, cache)
 			if err != nil {
-				return nil, err
+				return err
 			}
-			tokens = append(tokens, tokenImport)
+			ast.Tokens = append(ast.Tokens, tokenImport)
 			i = newIndex
 
-		case selectorAll[0]:
+		case selectorAll:
+			fmt.Println("Work ALL")
 			tokenAll, newIndex, err := tokenSelectorAll(i, cache)
 			if err != nil {
-				return nil, err
+				return err
 			}
-			tokens = append(tokens, tokenAll)
+			ast.Tokens = append(ast.Tokens, tokenAll)
 			i = newIndex
 
-		case selectorID[0]:
+		case selectorID:
 			tokenID, newIndex, err := tokenSelectorID(i, cache)
 			if err != nil {
-				return nil, err
+				return err
 			}
-			tokens = append(tokens, tokenID)
+			ast.Tokens = append(ast.Tokens, tokenID)
 			i = newIndex
 
 		default:
-			if strings.Contains(string(k[0]), ".") {
+			if strings.Contains(string(cache[i][0]), ".") {
+				fmt.Println("Work CLASS")
 				tokenClass, newIndex, err := tokenSelectorClass(i, cache)
 				if err != nil {
-					return nil, err
+					return err
 				}
-				tokens = append(tokens, tokenClass)
+				fmt.Println(tokenClass)
+				ast.Tokens = append(ast.Tokens, tokenClass)
 				i = newIndex
-			}
-			if !strings.Contains(string(k[0]), ".") {
+			} else {
+				fmt.Println("Work TAG", cache[i])
 				tokenTag, newIndex, err := tokenSelectorTag(i, cache)
 				if err != nil {
-					return nil, err
+					return err
 				}
-				tokens = append(tokens, tokenTag)
+				ast.Tokens = append(ast.Tokens, tokenTag)
 				i = newIndex
 			}
 		}
 
 	}
-	return tokens, nil
+	return nil
 }
 
 func tokenARule(i int, cache map[int][]byte) (*Token, int, error) {
@@ -173,6 +189,7 @@ func tokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 			token.Rules = append(token.Rules, &Rule)
 			i++
 		}
+		i++
 		return token, i, nil
 	}
 	return nil, 0, errors.New("invalid @-rule")
@@ -200,6 +217,7 @@ func tokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
 		token.Rules = append(token.Rules, &Rule)
 		i++
 	}
+	i++
 	return token, i, nil
 }
 
@@ -225,6 +243,7 @@ func tokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
 		token.Rules = append(token.Rules, &Rule)
 		i++
 	}
+	i++
 	return token, i, nil
 }
 
@@ -250,6 +269,7 @@ func tokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
 		token.Rules = append(token.Rules, &Rule)
 		i++
 	}
+	i++
 	return token, i, nil
 }
 
@@ -275,14 +295,6 @@ func tokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
 		token.Rules = append(token.Rules, &Rule)
 		i++
 	}
+	i++
 	return token, i, nil
 }
-
-// func isValidSyntax(slice []string) bool {
-// 	if len(slice) != 2 || slice[1] != "{" {
-// 		if len(slice) != 1 || !strings.Contains(slice[0], "{") {
-// 			return false
-// 		}
-// 	}
-// 	return true
-// }
