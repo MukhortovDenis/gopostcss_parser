@@ -3,7 +3,6 @@ package parser
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"os"
 	"strings"
 
@@ -61,7 +60,6 @@ func (ast *AST) scanFile(filename string) error {
 		cache[i] = sc.Bytes()
 		i++
 	}
-	fmt.Println(cache)
 	err = ast.tokenizator(cache)
 	if err != nil {
 		ast.logger.Error("error", zap.Error(err))
@@ -71,9 +69,7 @@ func (ast *AST) scanFile(filename string) error {
 
 func (ast *AST) tokenizator(cache map[int][]byte) error {
 	var i int = 0
-	fmt.Println(len(cache))
 	for  {
-		fmt.Println(i, "and", len(cache))
 		if len(cache) == i{
 			break
 		}
@@ -96,7 +92,6 @@ func (ast *AST) tokenizator(cache map[int][]byte) error {
 			i = newIndex
 
 		case selectorAll:
-			fmt.Println("Work ALL")
 			tokenAll, newIndex, err := tokenSelectorAll(i, cache)
 			if err != nil {
 				return err
@@ -114,16 +109,13 @@ func (ast *AST) tokenizator(cache map[int][]byte) error {
 
 		default:
 			if strings.Contains(string(cache[i][0]), ".") {
-				fmt.Println("Work CLASS")
 				tokenClass, newIndex, err := tokenSelectorClass(i, cache)
 				if err != nil {
 					return err
 				}
-				fmt.Println(tokenClass)
 				ast.Tokens = append(ast.Tokens, tokenClass)
 				i = newIndex
 			} else {
-				fmt.Println("Work TAG", cache[i])
 				tokenTag, newIndex, err := tokenSelectorTag(i, cache)
 				if err != nil {
 					return err
@@ -148,7 +140,6 @@ func tokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 		for ind, word := range slice {
 			word = strings.TrimSuffix(word, ",")
 			word = strings.TrimSuffix(word, ";")
-			fmt.Println(word)
 			rule[ind] = word
 		}
 		Rule := Rule(rule)
