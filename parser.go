@@ -68,8 +68,8 @@ func (ast *AST) scanFile(filename string) ([]*Token, error) {
 
 func (ast *AST) tokenizator(cache map[int][]byte) ([]*Token, error) {
 	tokens := []*Token{}
-	for i, key := range cache {
-		switch key[0] {
+	for i, k := range cache {
+		switch k[0] {
 
 		case newline[0]:
 			continue
@@ -98,21 +98,23 @@ func (ast *AST) tokenizator(cache map[int][]byte) ([]*Token, error) {
 			tokens = append(tokens, tokenID)
 			i = newIndex
 
-		case selectorClass[0]:
-			tokenClass, newIndex, err := tokenSelectorClass(i, cache)
-			if err != nil {
-				return nil, err
-			}
-			tokens = append(tokens, tokenClass)
-			i = newIndex
-
 		default:
-			tokenTag, newIndex, err := tokenSelectorTag(i, cache)
-			if err != nil {
-				return nil, err
+			if strings.Contains(string(k[0]), ".") {
+				tokenClass, newIndex, err := tokenSelectorClass(i, cache)
+				if err != nil {
+					return nil, err
+				}
+				tokens = append(tokens, tokenClass)
+				i = newIndex
 			}
-			tokens = append(tokens, tokenTag)
-			i = newIndex
+			if !strings.Contains(string(k[0]), ".") {
+				tokenTag, newIndex, err := tokenSelectorTag(i, cache)
+				if err != nil {
+					return nil, err
+				}
+				tokens = append(tokens, tokenTag)
+				i = newIndex
+			}
 		}
 
 	}
@@ -154,9 +156,13 @@ func tokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 	if strings.Contains(string(cache[i]), "@font-face") || strings.Contains(string(cache[i]), "@page") {
 		firstSlice := strings.Split(string(cache[i]), " ")
 		token.Name = firstSlice[0]
+		i++
 		for {
 			rule := map[int]string{}
 			str = cache[i]
+			if strings.Contains(string(str), "}") {
+				break
+			}
 			slice := strings.Split(string(str), " ")
 			for ind, word := range slice {
 				word = strings.TrimSuffix(word, ",")
@@ -166,9 +172,6 @@ func tokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 			Rule := Rule(rule)
 			token.Rules = append(token.Rules, &Rule)
 			i++
-			if strings.Contains(string(str), "}") {
-				break
-			}
 		}
 		return token, i, nil
 	}
@@ -184,18 +187,18 @@ func tokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
 	for {
 		rule := map[int]string{}
 		str = cache[i]
+		if strings.Contains(string(str), "}") {
+			break
+		}
 		slice := strings.Split(string(str), " ")
 		for ind, word := range slice {
 			word = strings.TrimSuffix(word, ",")
 			word = strings.TrimSuffix(word, ";")
 			rule[ind] = word
-			Rule := Rule(rule)
-			token.Rules = append(token.Rules, &Rule)
 		}
+		Rule := Rule(rule)
+		token.Rules = append(token.Rules, &Rule)
 		i++
-		if strings.Contains(string(str), "}") {
-			break
-		}
 	}
 	return token, i, nil
 }
@@ -209,18 +212,18 @@ func tokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
 	for {
 		rule := map[int]string{}
 		str = cache[i]
+		if strings.Contains(string(str), "}") {
+			break
+		}
 		slice := strings.Split(string(str), " ")
 		for ind, word := range slice {
 			word = strings.TrimSuffix(word, ",")
 			word = strings.TrimSuffix(word, ";")
 			rule[ind] = word
-			Rule := Rule(rule)
-			token.Rules = append(token.Rules, &Rule)
 		}
+		Rule := Rule(rule)
+		token.Rules = append(token.Rules, &Rule)
 		i++
-		if strings.Contains(string(str), "}") {
-			break
-		}
 	}
 	return token, i, nil
 }
@@ -234,18 +237,18 @@ func tokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
 	for {
 		rule := map[int]string{}
 		str = cache[i]
+		if strings.Contains(string(str), "}") {
+			break
+		}
 		slice := strings.Split(string(str), " ")
 		for ind, word := range slice {
 			word = strings.TrimSuffix(word, ",")
 			word = strings.TrimSuffix(word, ";")
 			rule[ind] = word
-			Rule := Rule(rule)
-			token.Rules = append(token.Rules, &Rule)
 		}
+		Rule := Rule(rule)
+		token.Rules = append(token.Rules, &Rule)
 		i++
-		if strings.Contains(string(str), "}") {
-			break
-		}
 	}
 	return token, i, nil
 }
@@ -259,18 +262,18 @@ func tokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
 	for {
 		rule := map[int]string{}
 		str = cache[i]
+		if strings.Contains(string(str), "}") {
+			break
+		}
 		slice := strings.Split(string(str), " ")
 		for ind, word := range slice {
 			word = strings.TrimSuffix(word, ",")
 			word = strings.TrimSuffix(word, ";")
 			rule[ind] = word
-			Rule := Rule(rule)
-			token.Rules = append(token.Rules, &Rule)
 		}
+		Rule := Rule(rule)
+		token.Rules = append(token.Rules, &Rule)
 		i++
-		if strings.Contains(string(str), "}") {
-			break
-		}
 	}
 	return token, i, nil
 }
