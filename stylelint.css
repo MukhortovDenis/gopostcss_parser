@@ -1,3 +1,10 @@
+@import url("chrome://communicator/skin/");
+
+@font-face {
+  font-family: Pompadur;
+  src: url(fonts/pompadur.ttf);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
