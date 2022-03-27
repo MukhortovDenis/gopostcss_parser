@@ -44,7 +44,7 @@ func Test_tokenARule(t *testing.T) {
 	testCases := []map[int][]byte{testCaseImport, testCaseCharset, testCaseFontFace, testCasePage}
 	t.Run("Проверка создания токена с импортом", func(t *testing.T) {
 		for ind := range testCases {
-			token, index, err := tokenARule(0, testCases[ind])
+			token, index, err := newTokenARule(0, testCases[ind])
 			if err != nil {
 				t.Error(err)
 			}
@@ -59,7 +59,7 @@ func Test_tokenARule(t *testing.T) {
 
 func Test_tokenSelectorID(t *testing.T) {
 	t.Run("Проверка создания токена идентификатора", func(tt *testing.T) {
-		token, index, err := tokenSelectorID(0, testCaseID)
+		token, index, err := newTokenSelectorID(0, testCaseID)
 		if err != nil {
 			t.Error(err)
 		}
@@ -73,7 +73,7 @@ func Test_tokenSelectorID(t *testing.T) {
 
 func Test_tokenSelectorClass(t *testing.T) {
 	t.Run("Проверка создания токена класса", func(tt *testing.T) {
-		token, index, err := tokenSelectorClass(0, testCaseClass)
+		token, index, err := newTokenSelectorClass(0, testCaseClass)
 		if err != nil {
 			t.Error(err)
 		}
@@ -87,7 +87,7 @@ func Test_tokenSelectorClass(t *testing.T) {
 
 func Test_tokenSelectorAll(t *testing.T) {
 	t.Run("Проверка создания токена универсального селектора", func(tt *testing.T) {
-		token, index, err := tokenSelectorAll(0, testCaseAll)
+		token, index, err := newTokenSelectorAll(0, testCaseAll)
 		if err != nil {
 			t.Error(err)
 		}
@@ -101,7 +101,7 @@ func Test_tokenSelectorAll(t *testing.T) {
 
 func Test_tokenSelectorTag(t *testing.T) {
 	t.Run("Проверка создания токена селектора тега", func(tt *testing.T) {
-		token, index, err := tokenSelectorTag(7, testCaseTag)
+		token, index, err := newTokenSelectorTag(7, testCaseTag)
 		if err != nil {
 			t.Error(err)
 		}

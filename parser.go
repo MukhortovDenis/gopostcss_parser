@@ -17,7 +17,15 @@ const (
 	a_rule        byte = 64
 )
 
-var nullString []byte =[]byte{}
+const (
+	aRuleType         = "@-Rules"
+	selectorIDType    = "Selector ID"
+	selectorClassType = "Selector Class"
+	selectorAllType   = "Selector All"
+	selectorTagType   = "Selector Tag"
+)
+
+var nullString []byte = []byte{}
 
 type AST struct {
 	Tokens []*Token
@@ -34,7 +42,10 @@ type Rule map[int]string
 
 // ParseIntoAST css into AST
 func ParseIntoAST(filename string) (*AST, error) {
-	logger, _ := zap.NewDevelopment()
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		return nil, err
+	}
 	AST := &AST{
 		logger: logger}
 	AST.scanFile(filename)
@@ -42,7 +53,59 @@ func ParseIntoAST(filename string) (*AST, error) {
 }
 
 // ParseIntoCSS parse AST to css
-func ParseIntoCSS(ast *AST) error {
+func ParseIntoCSS(ast *AST, filename string) error {
+	if err := ast.createFile(filename); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ast *AST) createFile(filename string) error {
+	file, err := os.OpenFile("new_"+filename, os.O_CREATE|os.O_APPEND, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	if err = ast.writeTokens(file); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ast *AST) writeTokens(file *os.File) error {
+	for token := range ast.Tokens {
+		switch ast.Tokens[token].Type {
+
+		case selectorClassType:
+			if err := writeTokenSelectorClass(ast.Tokens[token]); err != nil {
+				return err
+			}
+
+		case selectorTagType:
+			if err := writeTokenSelectorTag(ast.Tokens[token]); err != nil {
+				return err
+			}
+
+		case aRuleType:
+			if err := writeTokenARule(ast.Tokens[token]); err != nil {
+				return err
+			}
+
+		case selectorIDType:
+			if err := writeTokenSelectorID(ast.Tokens[token]); err != nil {
+				return err
+			}
+
+		case selectorAllType:
+			if err := writeTokenSelectorAll(ast.Tokens[token]); err != nil {
+				return err
+			}
+
+		default:
+			return errUnexpectedType(ast.Tokens[token].Type)
+		}
+		file.WriteString("\n")
+	}
 	return nil
 }
 
@@ -69,14 +132,15 @@ func (ast *AST) scanFile(filename string) error {
 
 func (ast *AST) tokenizator(cache map[int][]byte) error {
 	var i int = 0
-	for  {
-		if len(cache) == i{
+	for {
+		if len(cache) == i {
 			break
 		}
 		if len(cache[i]) == 0 {
 			i++
 			continue
 		}
+
 		switch cache[i][0] {
 
 		case newline:
@@ -84,7 +148,7 @@ func (ast *AST) tokenizator(cache map[int][]byte) error {
 			continue
 
 		case a_rule:
-			tokenImport, newIndex, err := tokenARule(i, cache)
+			tokenImport, newIndex, err := newTokenARule(i, cache)
 			if err != nil {
 				return err
 			}
@@ -92,7 +156,7 @@ func (ast *AST) tokenizator(cache map[int][]byte) error {
 			i = newIndex
 
 		case selectorAll:
-			tokenAll, newIndex, err := tokenSelectorAll(i, cache)
+			tokenAll, newIndex, err := newTokenSelectorAll(i, cache)
 			if err != nil {
 				return err
 			}
@@ -100,7 +164,7 @@ func (ast *AST) tokenizator(cache map[int][]byte) error {
 			i = newIndex
 
 		case selectorID:
-			tokenID, newIndex, err := tokenSelectorID(i, cache)
+			tokenID, newIndex, err := newTokenSelectorID(i, cache)
 			if err != nil {
 				return err
 			}
@@ -109,14 +173,14 @@ func (ast *AST) tokenizator(cache map[int][]byte) error {
 
 		default:
 			if strings.Contains(string(cache[i][0]), ".") {
-				tokenClass, newIndex, err := tokenSelectorClass(i, cache)
+				tokenClass, newIndex, err := newTokenSelectorClass(i, cache)
 				if err != nil {
 					return err
 				}
 				ast.Tokens = append(ast.Tokens, tokenClass)
 				i = newIndex
 			} else {
-				tokenTag, newIndex, err := tokenSelectorTag(i, cache)
+				tokenTag, newIndex, err := newTokenSelectorTag(i, cache)
 				if err != nil {
 					return err
 				}
@@ -124,13 +188,12 @@ func (ast *AST) tokenizator(cache map[int][]byte) error {
 				i = newIndex
 			}
 		}
-
 	}
 	return nil
 }
 
-func tokenARule(i int, cache map[int][]byte) (*Token, int, error) {
-	token := &Token{Type: "@-Rules"}
+func newTokenARule(i int, cache map[int][]byte) (*Token, int, error) {
+	token := &Token{Type: aRuleType}
 	rule := map[int]string{}
 	var str []byte
 	str = cache[i]
@@ -186,8 +249,8 @@ func tokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 	return nil, 0, errors.New("invalid @-rule")
 }
 
-func tokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
-	token := &Token{Type: "Selector ID"}
+func newTokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
+	token := &Token{Type: selectorIDType}
 	var str []byte
 	firstSlice := strings.Split(string(cache[i]), " ")
 	token.Name = firstSlice[0]
@@ -212,8 +275,8 @@ func tokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
 	return token, i, nil
 }
 
-func tokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
-	token := &Token{Type: "Selector Class"}
+func newTokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
+	token := &Token{Type: selectorClassType}
 	var str []byte
 	firstSlice := strings.Split(string(cache[i]), " ")
 	token.Name = firstSlice[0]
@@ -238,8 +301,8 @@ func tokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
 	return token, i, nil
 }
 
-func tokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
-	token := &Token{Type: "Selector All"}
+func newTokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
+	token := &Token{Type: selectorAllType}
 	var str []byte
 	firstSlice := strings.Split(string(cache[i]), " ")
 	token.Name = firstSlice[0]
@@ -264,8 +327,8 @@ func tokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
 	return token, i, nil
 }
 
-func tokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
-	token := &Token{Type: "Selector Tag"}
+func newTokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
+	token := &Token{Type: selectorTagType}
 	var str []byte
 	firstSlice := strings.Split(string(cache[i]), " ")
 	token.Name = firstSlice[0]
@@ -288,4 +351,24 @@ func tokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
 	}
 	i++
 	return token, i, nil
+}
+
+func writeTokenARule(token *Token) error {
+	return nil
+}
+
+func writeTokenSelectorID(token *Token) error {
+	return nil
+}
+
+func writeTokenSelectorClass(token *Token) error {
+	return nil
+}
+
+func writeTokenSelectorAll(token *Token) error {
+	return nil
+}
+
+func writeTokenSelectorTag(token *Token) error {
+	return nil
 }
