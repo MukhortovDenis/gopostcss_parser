@@ -50,11 +50,11 @@ func Test_tokenARule(t *testing.T) {
 			}
 			t.Log(token, "\n", index)
 			for i := range token.Rules {
+				t.Log(*token.Rules[i])
 				for k := range *token.Rules[i]{
 					slice := *token.Rules[i]
-					t.Log(slice[k], "\n")
+					t.Log(*slice[k])
 				}
-				t.Log(*token.Rules[i], "\n")
 			}
 			t.Log("-----------------------------------------")
 		}
@@ -69,7 +69,11 @@ func Test_tokenSelectorID(t *testing.T) {
 		}
 		t.Log(token, "\n", index)
 		for i := range token.Rules {
-			t.Log(*token.Rules[i], "\n")
+			t.Log(*token.Rules[i])
+			for k := range *token.Rules[i]{
+				slice := *token.Rules[i]
+				t.Log(*slice[k])
+			}
 		}
 		t.Log("-----------------------------------------")
 	})
@@ -83,7 +87,11 @@ func Test_tokenSelectorClass(t *testing.T) {
 		}
 		t.Log(token, "\n", index)
 		for i := range token.Rules {
-			t.Log(*token.Rules[i], "\n")
+			t.Log(*token.Rules[i])
+			for k := range *token.Rules[i]{
+				slice := *token.Rules[i]
+				t.Log(*slice[k])
+			}
 		}
 		t.Log("-----------------------------------------")
 	})
@@ -97,7 +105,11 @@ func Test_tokenSelectorAll(t *testing.T) {
 		}
 		t.Log(token, "\n", index)
 		for i := range token.Rules {
-			t.Log(*token.Rules[i], "\n")
+			t.Log(*token.Rules[i])
+			for k := range *token.Rules[i]{
+				slice := *token.Rules[i]
+				t.Log(*slice[k])
+			}
 		}
 		t.Log("-----------------------------------------")
 	})
@@ -111,7 +123,11 @@ func Test_tokenSelectorTag(t *testing.T) {
 		}
 		t.Log(token, "\n", index)
 		for i := range token.Rules {
-			t.Log(*token.Rules[i], "\n")
+			t.Log(*token.Rules[i])
+			for k := range *token.Rules[i]{
+				slice := *token.Rules[i]
+				t.Log(*slice[k])
+			}
 		}
 		t.Log("-----------------------------------------")
 	})
@@ -127,7 +143,12 @@ func Test_ParseIntoAST(t *testing.T){
 		for i := range ast.Tokens {
 			t.Log(ast.Tokens[i], "\n")
 			for k := range ast.Tokens[i].Rules{
-				t.Log(*ast.Tokens[i].Rules[k], "\n")
+				t.Log(*ast.Tokens[i].Rules[k])
+				for j := range *ast.Tokens[i].Rules[k]{
+					slice := *ast.Tokens[i].Rules[k]
+					t.Log(*slice[j])
+				}
+				t.Log("==============================================")
 			}
 		}
 	})

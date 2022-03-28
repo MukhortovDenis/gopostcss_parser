@@ -11,11 +11,16 @@ func Test_ParseIntoCSS(t *testing.T) {
 		for i := range ast.Tokens {
 			t.Log(ast.Tokens[i], "\n")
 			for k := range ast.Tokens[i].Rules {
-				t.Log(ast.Tokens[i].Rules[k], "\n")
+				t.Log(*ast.Tokens[i].Rules[k])
+				for j := range *ast.Tokens[i].Rules[k] {
+					slice := *ast.Tokens[i].Rules[k]
+					t.Log(*slice[j])
+				}
+				t.Log("==============================================")
 			}
-		}
-		if err = ParseIntoCSS(ast, "parsetocss.css"); err != nil {
-			tt.Error(err)
+			if err = ParseIntoCSS(ast, "parsetocss.css"); err != nil {
+				tt.Error(err)
+			}
 		}
 	})
 }
