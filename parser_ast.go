@@ -52,63 +52,6 @@ func ParseIntoAST(filename string) (*AST, error) {
 	return AST, nil
 }
 
-// ParseIntoCSS parse AST to css
-func ParseIntoCSS(ast *AST, filename string) error {
-	if err := ast.createFile(filename); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (ast *AST) createFile(filename string) error {
-	file, err := os.OpenFile("new_"+filename, os.O_CREATE|os.O_APPEND, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	if err = ast.writeTokens(file); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (ast *AST) writeTokens(file *os.File) error {
-	for token := range ast.Tokens {
-		switch ast.Tokens[token].Type {
-
-		case selectorClassType:
-			if err := writeTokenSelectorClass(ast.Tokens[token]); err != nil {
-				return err
-			}
-
-		case selectorTagType:
-			if err := writeTokenSelectorTag(ast.Tokens[token]); err != nil {
-				return err
-			}
-
-		case aRuleType:
-			if err := writeTokenARule(ast.Tokens[token]); err != nil {
-				return err
-			}
-
-		case selectorIDType:
-			if err := writeTokenSelectorID(ast.Tokens[token]); err != nil {
-				return err
-			}
-
-		case selectorAllType:
-			if err := writeTokenSelectorAll(ast.Tokens[token]); err != nil {
-				return err
-			}
-
-		default:
-			return errUnexpectedType(ast.Tokens[token].Type)
-		}
-		file.WriteString("\n")
-	}
-	return nil
-}
-
 func (ast *AST) scanFile(filename string) error {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -199,7 +142,7 @@ func newTokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 	str = cache[i]
 	if strings.Contains(string(cache[i]), "import") {
 		token.Name = "@import"
-		slice := strings.Split(string(str), " ")
+		slice := strings.Fields(string(str))
 		for ind, word := range slice {
 			word = strings.TrimSuffix(word, ",")
 			word = strings.TrimSuffix(word, ";")
@@ -224,7 +167,7 @@ func newTokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 		return token, i, nil
 	}
 	if strings.Contains(string(cache[i]), "@font-face") || strings.Contains(string(cache[i]), "@page") {
-		firstSlice := strings.Split(string(cache[i]), " ")
+		firstSlice := strings.Fields(string(cache[i]))
 		token.Name = firstSlice[0]
 		i++
 		for {
@@ -233,7 +176,7 @@ func newTokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 			if strings.Contains(string(str), "}") {
 				break
 			}
-			slice := strings.Split(string(str), " ")
+			slice := strings.Fields(string(str))
 			for ind, word := range slice {
 				word = strings.TrimSuffix(word, ",")
 				word = strings.TrimSuffix(word, ";")
@@ -252,7 +195,7 @@ func newTokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 func newTokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
 	token := &Token{Type: selectorIDType}
 	var str []byte
-	firstSlice := strings.Split(string(cache[i]), " ")
+	firstSlice := strings.Fields(string(cache[i]))
 	token.Name = firstSlice[0]
 	i++
 	for {
@@ -261,7 +204,7 @@ func newTokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
 		if strings.Contains(string(str), "}") {
 			break
 		}
-		slice := strings.Split(string(str), " ")
+		slice := strings.Fields(string(str))
 		for ind, word := range slice {
 			word = strings.TrimSuffix(word, ",")
 			word = strings.TrimSuffix(word, ";")
@@ -278,7 +221,7 @@ func newTokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
 func newTokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
 	token := &Token{Type: selectorClassType}
 	var str []byte
-	firstSlice := strings.Split(string(cache[i]), " ")
+	firstSlice := strings.Fields(string(cache[i]))
 	token.Name = firstSlice[0]
 	i++
 	for {
@@ -287,7 +230,7 @@ func newTokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
 		if strings.Contains(string(str), "}") {
 			break
 		}
-		slice := strings.Split(string(str), " ")
+		slice := strings.Fields(string(str))
 		for ind, word := range slice {
 			word = strings.TrimSuffix(word, ",")
 			word = strings.TrimSuffix(word, ";")
@@ -304,7 +247,7 @@ func newTokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
 func newTokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
 	token := &Token{Type: selectorAllType}
 	var str []byte
-	firstSlice := strings.Split(string(cache[i]), " ")
+	firstSlice := strings.Fields(string(cache[i]))
 	token.Name = firstSlice[0]
 	i++
 	for {
@@ -313,7 +256,7 @@ func newTokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
 		if strings.Contains(string(str), "}") {
 			break
 		}
-		slice := strings.Split(string(str), " ")
+		slice := strings.Fields(string(str))
 		for ind, word := range slice {
 			word = strings.TrimSuffix(word, ",")
 			word = strings.TrimSuffix(word, ";")
@@ -330,7 +273,7 @@ func newTokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
 func newTokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
 	token := &Token{Type: selectorTagType}
 	var str []byte
-	firstSlice := strings.Split(string(cache[i]), " ")
+	firstSlice := strings.Fields(string(cache[i]))
 	token.Name = firstSlice[0]
 	i++
 	for {
@@ -339,7 +282,7 @@ func newTokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
 		if strings.Contains(string(str), "}") {
 			break
 		}
-		slice := strings.Split(string(str), " ")
+		slice := strings.Fields(string(str))
 		for ind, word := range slice {
 			word = strings.TrimSuffix(word, ",")
 			word = strings.TrimSuffix(word, ";")
@@ -351,24 +294,4 @@ func newTokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
 	}
 	i++
 	return token, i, nil
-}
-
-func writeTokenARule(token *Token) error {
-	return nil
-}
-
-func writeTokenSelectorID(token *Token) error {
-	return nil
-}
-
-func writeTokenSelectorClass(token *Token) error {
-	return nil
-}
-
-func writeTokenSelectorAll(token *Token) error {
-	return nil
-}
-
-func writeTokenSelectorTag(token *Token) error {
-	return nil
 }
