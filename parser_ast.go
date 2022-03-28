@@ -38,7 +38,7 @@ type Token struct {
 	Rules []*Rule
 }
 
-type Rule map[int]string
+type Rule []*string
 
 // ParseIntoAST css into AST
 func ParseIntoAST(filename string) (*AST, error) {
@@ -137,16 +137,16 @@ func (ast *AST) tokenizator(cache map[int][]byte) error {
 
 func newTokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 	token := &Token{Type: aRuleType}
-	rule := map[int]string{}
+	rule := make([]*string, 0)
 	var str []byte
 	str = cache[i]
 	if strings.Contains(string(cache[i]), "import") {
 		token.Name = "@import"
 		slice := strings.Fields(string(str))
-		for ind, word := range slice {
-			word = strings.TrimSuffix(word, ",")
-			word = strings.TrimSuffix(word, ";")
-			rule[ind] = word
+		for ind := range slice {
+			slice[ind] = strings.TrimSuffix(slice[ind], ",")
+			slice[ind] = strings.TrimSuffix(slice[ind], ";")
+			rule = append(rule, &slice[ind])
 		}
 		Rule := Rule(rule)
 		token.Rules = append(token.Rules, &Rule)
@@ -156,10 +156,10 @@ func newTokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 	if strings.Contains(string(cache[i]), "charset") {
 		token.Name = "@charset"
 		slice := strings.Split(string(str), " ")
-		for ind, word := range slice {
-			word = strings.TrimSuffix(word, ",")
-			word = strings.TrimSuffix(word, ";")
-			rule[ind] = word
+		for ind := range slice {
+			slice[ind] = strings.TrimSuffix(slice[ind], ",")
+			slice[ind] = strings.TrimSuffix(slice[ind], ";")
+			rule = append(rule, &slice[ind])
 		}
 		Rule := Rule(rule)
 		token.Rules = append(token.Rules, &Rule)
@@ -171,16 +171,16 @@ func newTokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 		token.Name = firstSlice[0]
 		i++
 		for {
-			rule := map[int]string{}
+			rule := make([]*string, 0)
 			str = cache[i]
 			if strings.Contains(string(str), "}") {
 				break
 			}
 			slice := strings.Fields(string(str))
-			for ind, word := range slice {
-				word = strings.TrimSuffix(word, ",")
-				word = strings.TrimSuffix(word, ";")
-				rule[ind] = word
+			for ind := range slice {
+				slice[ind] = strings.TrimSuffix(slice[ind], ",")
+				slice[ind] = strings.TrimSuffix(slice[ind], ";")
+				rule = append(rule, &slice[ind])
 			}
 			Rule := Rule(rule)
 			token.Rules = append(token.Rules, &Rule)
@@ -199,16 +199,16 @@ func newTokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
 	token.Name = firstSlice[0]
 	i++
 	for {
-		rule := map[int]string{}
+		rule := make([]*string, 0)
 		str = cache[i]
 		if strings.Contains(string(str), "}") {
 			break
 		}
 		slice := strings.Fields(string(str))
-		for ind, word := range slice {
-			word = strings.TrimSuffix(word, ",")
-			word = strings.TrimSuffix(word, ";")
-			rule[ind] = word
+		for ind := range slice {
+			slice[ind] = strings.TrimSuffix(slice[ind], ",")
+			slice[ind] = strings.TrimSuffix(slice[ind], ";")
+			rule = append(rule, &slice[ind])
 		}
 		Rule := Rule(rule)
 		token.Rules = append(token.Rules, &Rule)
@@ -225,16 +225,16 @@ func newTokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
 	token.Name = firstSlice[0]
 	i++
 	for {
-		rule := map[int]string{}
+		rule := make([]*string, 0)
 		str = cache[i]
 		if strings.Contains(string(str), "}") {
 			break
 		}
 		slice := strings.Fields(string(str))
-		for ind, word := range slice {
-			word = strings.TrimSuffix(word, ",")
-			word = strings.TrimSuffix(word, ";")
-			rule[ind] = word
+		for ind := range slice {
+			slice[ind] = strings.TrimSuffix(slice[ind], ",")
+			slice[ind] = strings.TrimSuffix(slice[ind], ";")
+			rule = append(rule, &slice[ind])
 		}
 		Rule := Rule(rule)
 		token.Rules = append(token.Rules, &Rule)
@@ -251,16 +251,16 @@ func newTokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
 	token.Name = firstSlice[0]
 	i++
 	for {
-		rule := map[int]string{}
+		rule := make([]*string, 0)
 		str = cache[i]
 		if strings.Contains(string(str), "}") {
 			break
 		}
 		slice := strings.Fields(string(str))
-		for ind, word := range slice {
-			word = strings.TrimSuffix(word, ",")
-			word = strings.TrimSuffix(word, ";")
-			rule[ind] = word
+		for ind := range slice {
+			slice[ind] = strings.TrimSuffix(slice[ind], ",")
+			slice[ind] = strings.TrimSuffix(slice[ind], ";")
+			rule = append(rule, &slice[ind])
 		}
 		Rule := Rule(rule)
 		token.Rules = append(token.Rules, &Rule)
@@ -277,16 +277,16 @@ func newTokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
 	token.Name = firstSlice[0]
 	i++
 	for {
-		rule := map[int]string{}
+		rule := make([]*string, 0)
 		str = cache[i]
 		if strings.Contains(string(str), "}") {
 			break
 		}
 		slice := strings.Fields(string(str))
-		for ind, word := range slice {
-			word = strings.TrimSuffix(word, ",")
-			word = strings.TrimSuffix(word, ";")
-			rule[ind] = word
+		for ind := range slice {
+			slice[ind] = strings.TrimSuffix(slice[ind], ",")
+			slice[ind] = strings.TrimSuffix(slice[ind], ";")
+			rule = append(rule, &slice[ind])
 		}
 		Rule := Rule(rule)
 		token.Rules = append(token.Rules, &Rule)

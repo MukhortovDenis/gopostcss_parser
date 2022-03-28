@@ -78,7 +78,7 @@ func writeTokenSelectorClass(token *Token, file *os.File) error {
 		for j := range *token.Rules[i] {
 			str := *token.Rules[i]
 			newstr := str[j]
-			_, err := file.WriteString(" "+ newstr)
+			_, err := file.WriteString(" "+ *newstr)
 			if err != nil {
 				return err
 			}
