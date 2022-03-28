@@ -1,4 +1,4 @@
-@import url("chrome://communicator/skin/");
+@import url(foo.css);
 
 @font-face {
   font-family: Pompadur;

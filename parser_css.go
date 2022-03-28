@@ -56,6 +56,9 @@ func (ast *AST) writeTokens(file *os.File) error {
 		default:
 			return errUnexpectedType(ast.Tokens[token].Type)
 		}
+		if len(ast.Tokens) == token+1 {
+			return nil
+		}
 		_, err := file.WriteString("\n")
 		if err != nil {
 			return err
@@ -102,7 +105,7 @@ func writeTokenARule(token *Token, file *os.File) error {
 			return err
 		}
 	}
-	_, err = file.WriteString("}\n ")
+	_, err = file.WriteString("}\n")
 	if err != nil {
 		return err
 	}
@@ -132,7 +135,7 @@ func writeTokenSelectorID(token *Token, file *os.File) error {
 			return err
 		}
 	}
-	_, err = file.WriteString("}\n ")
+	_, err = file.WriteString("}\n")
 	if err != nil {
 		return err
 	}
@@ -162,7 +165,7 @@ func writeTokenSelectorClass(token *Token, file *os.File) error {
 			return err
 		}
 	}
-	_, err = file.WriteString("}\n ")
+	_, err = file.WriteString("}\n")
 	if err != nil {
 		return err
 	}
@@ -192,7 +195,7 @@ func writeTokenSelectorAll(token *Token, file *os.File) error {
 			return err
 		}
 	}
-	_, err = file.WriteString("}\n ")
+	_, err = file.WriteString("}\n")
 	if err != nil {
 		return err
 	}
@@ -222,7 +225,7 @@ func writeTokenSelectorTag(token *Token, file *os.File) error {
 			return err
 		}
 	}
-	_, err = file.WriteString("}\n ")
+	_, err = file.WriteString("}\n")
 	if err != nil {
 		return err
 	}
