@@ -11,3 +11,7 @@ func errWrongSyntax(i int) error {
 func errUnexpectedType(types string) error {
 	return fmt.Errorf("unexpected type of token: %v", types)
 }
+
+func errWrongNumberRules(rules []*Rule) error {
+	return fmt.Errorf("many rules in @-rule,")
+}

@@ -18,9 +18,9 @@ func Test_ParseIntoCSS(t *testing.T) {
 				}
 				t.Log("==============================================")
 			}
-			if err = ParseIntoCSS(ast, "parsetocss.css"); err != nil {
-				tt.Error(err)
-			}
+		}
+		if err = ParseIntoCSS(ast, "parsetocss.css"); err != nil {
+			tt.Error(err)
 		}
 	})
 }

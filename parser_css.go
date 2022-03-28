@@ -1,6 +1,9 @@
 package parser
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 func ParseIntoCSS(ast *AST, filename string) error {
 	if err := ast.createFile(filename); err != nil {
@@ -53,15 +56,86 @@ func (ast *AST) writeTokens(file *os.File) error {
 		default:
 			return errUnexpectedType(ast.Tokens[token].Type)
 		}
+		_, err := file.WriteString("\n")
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 func writeTokenARule(token *Token, file *os.File) error {
+	if token.Name == "@import" || token.Name == "@charset" {
+		if len(token.Rules) != 1 {
+			return errWrongNumberRules(token.Rules)
+		}
+		slice := *token.Rules[0]
+		newSlice := make([]string, 0)
+		for rule := range *token.Rules[0] {
+			newSlice = append(newSlice, *slice[rule])
+		}
+		_, err := file.WriteString(strings.Join(newSlice, " ") + ";\n")
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	_, err := file.WriteString(token.Name + " {\n")
+	if err != nil {
+		return err
+	}
+	for i := range token.Rules {
+		_, err := file.WriteString(" ")
+		if err != nil {
+			return err
+		}
+		for j := range *token.Rules[i] {
+			str := *token.Rules[i]
+			newstr := str[j]
+			_, err := file.WriteString(" " + *newstr)
+			if err != nil {
+				return err
+			}
+		}
+		_, err = file.WriteString(";\n")
+		if err != nil {
+			return err
+		}
+	}
+	_, err = file.WriteString("}\n ")
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func writeTokenSelectorID(token *Token, file *os.File) error {
+	_, err := file.WriteString(token.Name + " {\n")
+	if err != nil {
+		return err
+	}
+	for i := range token.Rules {
+		_, err := file.WriteString(" ")
+		if err != nil {
+			return err
+		}
+		for j := range *token.Rules[i] {
+			str := *token.Rules[i]
+			newstr := str[j]
+			_, err := file.WriteString(" " + *newstr)
+			if err != nil {
+				return err
+			}
+		}
+		_, err = file.WriteString(";\n")
+		if err != nil {
+			return err
+		}
+	}
+	_, err = file.WriteString("}\n ")
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -72,13 +146,13 @@ func writeTokenSelectorClass(token *Token, file *os.File) error {
 	}
 	for i := range token.Rules {
 		_, err := file.WriteString(" ")
-			if err != nil {
-				return err
-			}
+		if err != nil {
+			return err
+		}
 		for j := range *token.Rules[i] {
 			str := *token.Rules[i]
 			newstr := str[j]
-			_, err := file.WriteString(" "+ *newstr)
+			_, err := file.WriteString(" " + *newstr)
 			if err != nil {
 				return err
 			}
@@ -88,7 +162,7 @@ func writeTokenSelectorClass(token *Token, file *os.File) error {
 			return err
 		}
 	}
-	_, err = file.WriteString("}\n \n")
+	_, err = file.WriteString("}\n ")
 	if err != nil {
 		return err
 	}
@@ -96,9 +170,61 @@ func writeTokenSelectorClass(token *Token, file *os.File) error {
 }
 
 func writeTokenSelectorAll(token *Token, file *os.File) error {
+	_, err := file.WriteString(token.Name + " {\n")
+	if err != nil {
+		return err
+	}
+	for i := range token.Rules {
+		_, err := file.WriteString(" ")
+		if err != nil {
+			return err
+		}
+		for j := range *token.Rules[i] {
+			str := *token.Rules[i]
+			newstr := str[j]
+			_, err := file.WriteString(" " + *newstr)
+			if err != nil {
+				return err
+			}
+		}
+		_, err = file.WriteString(";\n")
+		if err != nil {
+			return err
+		}
+	}
+	_, err = file.WriteString("}\n ")
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func writeTokenSelectorTag(token *Token, file *os.File) error {
+	_, err := file.WriteString(token.Name + " {\n")
+	if err != nil {
+		return err
+	}
+	for i := range token.Rules {
+		_, err := file.WriteString(" ")
+		if err != nil {
+			return err
+		}
+		for j := range *token.Rules[i] {
+			str := *token.Rules[i]
+			newstr := str[j]
+			_, err := file.WriteString(" " + *newstr)
+			if err != nil {
+				return err
+			}
+		}
+		_, err = file.WriteString(";\n")
+		if err != nil {
+			return err
+		}
+	}
+	_, err = file.WriteString("}\n ")
+	if err != nil {
+		return err
+	}
 	return nil
 }

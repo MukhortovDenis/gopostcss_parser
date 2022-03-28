@@ -1,9 +1,42 @@
-.container {
-  width: 700px;
-  height: 410px;
-  padding: 0 60px;
-  border-radius: 5px;
-  background: linear-gradient(252.44deg #fff 0% #d6d6d6 100%);
+@import url("chrome://communicator/skin/");
+
+@font-face {
+  font-family: Pompadur;
+  src: url(fonts/pompadur.ttf);
+}
+ 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Exo 2" sans-serif;
+}
+ 
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100vh;
+  background: #e5e5e5;
+}
+ 
+.main-text {
+  text-align: center;
+  padding-top: 120px;
+}
+ 
+.main-title {
+  margin-bottom: 40px;
+  font-weight: 500;
+  font-size: 36px;
+}
+ 
+.main-description {
+  margin-bottom: 50px;
+  font-weight: normal;
+  font-size: 24px;
+  opacity: 0.8;
 }
  
 .container {
@@ -11,54 +44,19 @@
   height: 410px;
   padding: 0 60px;
   border-radius: 5px;
-  background: linear-gradient(252.44deg #fff 0% #d6d6d6 100%);
 }
  
-.container {
-  width: 700px;
-  height: 410px;
-  padding: 0 60px;
-  border-radius: 5px;
-  background: linear-gradient(252.44deg #fff 0% #d6d6d6 100%);
+.wrap-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 36px 0;
 }
  
-.container {
-  width: 700px;
-  height: 410px;
-  padding: 0 60px;
-  border-radius: 5px;
-  background: linear-gradient(252.44deg #fff 0% #d6d6d6 100%);
-}
- 
-.container {
-  width: 700px;
-  height: 410px;
-  padding: 0 60px;
-  border-radius: 5px;
-  background: linear-gradient(252.44deg #fff 0% #d6d6d6 100%);
-}
- 
-.container {
-  width: 700px;
-  height: 410px;
-  padding: 0 60px;
-  border-radius: 5px;
-  background: linear-gradient(252.44deg #fff 0% #d6d6d6 100%);
-}
- 
-.container {
-  width: 700px;
-  height: 410px;
-  padding: 0 60px;
-  border-radius: 5px;
-  background: linear-gradient(252.44deg #fff 0% #d6d6d6 100%);
-}
- 
-.container {
-  width: 700px;
-  height: 410px;
-  padding: 0 60px;
-  border-radius: 5px;
-  background: linear-gradient(252.44deg #fff 0% #d6d6d6 100%);
+.form-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #343c41;
 }
  
