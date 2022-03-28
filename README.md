@@ -22,6 +22,6 @@ type Rule []*string
 ```
 ### Получение нового CSS-файла
 ```
-func ParseIntoCSS(ast *AST, filename string) error {
+func ParseIntoCSS(ast *AST, filename string)
 ```
 filename - название старого css-файла
