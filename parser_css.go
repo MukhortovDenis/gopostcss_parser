@@ -13,7 +13,7 @@ func ParseIntoCSS(ast *AST, filename string) error {
 }
 
 func (ast *AST) createFile(filename string) error {
-	file, err := os.OpenFile("new_"+filename, os.O_CREATE|os.O_APPEND, os.ModePerm)
+	file, err := os.OpenFile("new_"+filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		return err
 	}
