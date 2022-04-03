@@ -3,10 +3,9 @@ package parser
 import (
 	"bufio"
 	"errors"
+	"log"
 	"os"
 	"strings"
-
-	"go.uber.org/zap"
 )
 
 const (
@@ -29,7 +28,7 @@ var nullString []byte = []byte{}
 
 type AST struct {
 	Tokens []*Token
-	logger *zap.Logger
+	// logger *zap.Logger
 }
 
 type Token struct {
@@ -42,12 +41,8 @@ type Rule []*string
 
 // ParseIntoAST css into AST
 func ParseIntoAST(filename string) (*AST, error) {
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		return nil, err
-	}
-	AST := &AST{
-		logger: logger}
+
+	AST := &AST{}
 	AST.scanFile(filename)
 	return AST, nil
 }
@@ -55,7 +50,7 @@ func ParseIntoAST(filename string) (*AST, error) {
 func (ast *AST) scanFile(filename string) error {
 	file, err := os.Open(filename)
 	if err != nil {
-		ast.logger.Error("error", zap.Error(err))
+		log.Fatal(err)
 	}
 
 	var i int
@@ -68,7 +63,7 @@ func (ast *AST) scanFile(filename string) error {
 	}
 	err = ast.tokenizator(cache)
 	if err != nil {
-		ast.logger.Error("error", zap.Error(err))
+		log.Fatal(err)
 	}
 	return nil
 }
