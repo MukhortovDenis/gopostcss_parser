@@ -28,7 +28,6 @@ var nullString []byte = []byte{}
 
 type AST struct {
 	Tokens []*Token
-	// logger *zap.Logger
 }
 
 type Token struct {
@@ -139,7 +138,6 @@ func newTokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 		token.Name = "@import"
 		slice := strings.Fields(string(str))
 		for ind := range slice {
-			slice[ind] = strings.TrimSuffix(slice[ind], ",")
 			slice[ind] = strings.TrimSuffix(slice[ind], ";")
 			rule = append(rule, &slice[ind])
 		}
@@ -152,7 +150,6 @@ func newTokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 		token.Name = "@charset"
 		slice := strings.Split(string(str), " ")
 		for ind := range slice {
-			slice[ind] = strings.TrimSuffix(slice[ind], ",")
 			slice[ind] = strings.TrimSuffix(slice[ind], ";")
 			rule = append(rule, &slice[ind])
 		}
@@ -173,7 +170,6 @@ func newTokenARule(i int, cache map[int][]byte) (*Token, int, error) {
 			}
 			slice := strings.Fields(string(str))
 			for ind := range slice {
-				slice[ind] = strings.TrimSuffix(slice[ind], ",")
 				slice[ind] = strings.TrimSuffix(slice[ind], ";")
 				rule = append(rule, &slice[ind])
 			}
@@ -201,7 +197,6 @@ func newTokenSelectorID(i int, cache map[int][]byte) (*Token, int, error) {
 		}
 		slice := strings.Fields(string(str))
 		for ind := range slice {
-			slice[ind] = strings.TrimSuffix(slice[ind], ",")
 			slice[ind] = strings.TrimSuffix(slice[ind], ";")
 			rule = append(rule, &slice[ind])
 		}
@@ -227,7 +222,6 @@ func newTokenSelectorClass(i int, cache map[int][]byte) (*Token, int, error) {
 		}
 		slice := strings.Fields(string(str))
 		for ind := range slice {
-			slice[ind] = strings.TrimSuffix(slice[ind], ",")
 			slice[ind] = strings.TrimSuffix(slice[ind], ";")
 			rule = append(rule, &slice[ind])
 		}
@@ -253,7 +247,6 @@ func newTokenSelectorAll(i int, cache map[int][]byte) (*Token, int, error) {
 		}
 		slice := strings.Fields(string(str))
 		for ind := range slice {
-			slice[ind] = strings.TrimSuffix(slice[ind], ",")
 			slice[ind] = strings.TrimSuffix(slice[ind], ";")
 			rule = append(rule, &slice[ind])
 		}
@@ -279,7 +272,6 @@ func newTokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
 		}
 		slice := strings.Fields(string(str))
 		for ind := range slice {
-			slice[ind] = strings.TrimSuffix(slice[ind], ",")
 			slice[ind] = strings.TrimSuffix(slice[ind], ";")
 			rule = append(rule, &slice[ind])
 		}
