@@ -52,6 +52,10 @@ func (ast *AST) writeTokens(file *os.File) error {
 			if err := writeTokenSelectorAll(ast.Tokens[token], file); err != nil {
 				return err
 			}
+		case comments:
+			if err := writeTokenComments(ast.Tokens[token], file); err != nil {
+				return err
+			}
 
 		default:
 			return errUnexpectedType(ast.Tokens[token].Type)
@@ -228,6 +232,20 @@ func writeTokenSelectorTag(token *Token, file *os.File) error {
 	_, err = file.WriteString("}\n")
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func writeTokenComments(token *Token, file *os.File) error {
+	for i := range token.Rules {
+		for j := range *token.Rules[i] {
+			str := *token.Rules[i]
+			newstr := str[j]
+			_, err := file.WriteString(" " + *newstr)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }

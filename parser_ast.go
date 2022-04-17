@@ -14,6 +14,7 @@ const (
 	selectorClass byte = 46
 	selectorAll   byte = 42
 	a_rule        byte = 64
+	slash         byte = 47
 )
 
 const (
@@ -22,6 +23,7 @@ const (
 	selectorClassType = "Selector Class"
 	selectorAllType   = "Selector All"
 	selectorTagType   = "Selector Tag"
+	comments          = "Comments"
 )
 
 var nullString []byte = []byte{}
@@ -106,6 +108,14 @@ func (ast *AST) tokenizator(cache map[int][]byte) error {
 				return err
 			}
 			ast.Tokens = append(ast.Tokens, tokenID)
+			i = newIndex
+
+		case slash:
+			tokenComment, newIndex, err := newTokenComments(i, cache)
+			if err != nil {
+				return err
+			}
+			ast.Tokens = append(ast.Tokens, tokenComment)
 			i = newIndex
 
 		default:
@@ -280,5 +290,26 @@ func newTokenSelectorTag(i int, cache map[int][]byte) (*Token, int, error) {
 		i++
 	}
 	i++
+	return token, i, nil
+}
+
+func newTokenComments(i int, cache map[int][]byte) (*Token, int, error) {
+	token := &Token{Type: comments}
+	var str []byte
+	token.Name = "Comment"
+	for {
+		rule := make([]*string, 0)
+		str = cache[i]
+		slice := strings.Fields(string(str))
+		for ind := range slice {
+			rule = append(rule, &slice[ind])
+		}
+		Rule := Rule(rule)
+		token.Rules = append(token.Rules, &Rule)
+		i++
+		if strings.Contains(string(str), "*/") {
+			break
+		}
+	}
 	return token, i, nil
 }
